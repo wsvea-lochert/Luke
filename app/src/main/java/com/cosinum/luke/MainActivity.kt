@@ -3,47 +3,47 @@ package com.cosinum.luke
 // code from https://developers.google.com/ml-kit/vision/object-detection/custom-models/android#4_run_the_object_detector and https://developer.android.com/codelabs/camerax-getting-started#5
 // with some tricks and mix by William Svea-Lochert
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.*
-import android.media.Image
 import android.net.Uri
-import android.util.AttributeSet
+import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
-import android.view.Surface
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
-import androidx.annotation.Nullable
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import java.util.concurrent.Executors
+import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import com.cosinum.luke.ml.TfliteTestMetadata
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.cosinum.luke.ml.*
+import com.cosinum.luke.util.JamesAngles
 import com.cosinum.luke.util.YuvToRgbConverter
 import com.cosinum.luke.viewmodel.Coordinate
-import com.cosinum.luke.viewmodel.CoordinateViewModel
-import com.google.mlkit.common.model.LocalModel
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.objects.DetectedObject
-import com.google.mlkit.vision.objects.ObjectDetection
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
 import kotlinx.android.synthetic.main.activity_main.*
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.io.File
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-typealias LumaListener = (luma: Double) -> Unit
+
+// typealias LumaListener = (luma: Double) -> Unit
 typealias CoordinateListener = (coordinate: List<Coordinate>) -> Unit
+typealias FpsListener = (fps: Double) -> Unit
+
 
 class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
@@ -52,11 +52,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var mlExecutor: ExecutorService
+    private var selectedModel: String = ""
 
+
+    private fun getSelectedModel(): String {
+        return selectedModel
+    }
+    fun setSelectedModel(model: String) {
+        selectedModel = model
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -72,8 +82,36 @@ class MainActivity : AppCompatActivity() {
         outputDirectory = getOutputDirectory()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-        mlExecutor = Executors.newSingleThreadExecutor()
 
+        // set up 4 threads for ml
+        //mlExecutor = Executors.newFixedThreadPool(4)
+
+        // mlExecutor = Executors.newSingleThreadExecutor()
+
+        val models = resources.getStringArray(R.array.model_array)
+
+        val spinner = findViewById<Spinner>(R.id.model_spinner)
+        if (spinner != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, models)
+            spinner.adapter = adapter
+        }
+
+        spinner.onItemSelectedListener = object :
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                Toast.makeText(this@MainActivity,
+                    getString(R.string.selected_item) + " " + "" + models[position], Toast.LENGTH_SHORT).show()
+                // do something here when a new model is selected..
+                setSelectedModel(models[position])
+                startCamera()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // defaults to Mobilenet
+                setSelectedModel("Mobilenet")
+            }
+        }
     }
 
     private fun takePhoto() {
@@ -107,9 +145,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     // Log the prediction results so they are readable input
     private fun debugPrint(joints: List<Coordinate>) {
+
         var canvas = Canvas(Bitmap.createBitmap(rectOverlay.width, rectOverlay.height, Bitmap.Config.ARGB_8888))
         val textPaint =
             Paint().apply {
@@ -118,24 +156,63 @@ class MainActivity : AppCompatActivity() {
                 style = Paint.Style.STROKE
             }
 
-        joints.forEachIndexed { index, joint ->
-            val x = joint.x
-            val y = joint.y
-            // we want to draw the bounding boxes here
 
-            // canvas.drawCircle(x*2, y*2, 10.0f, textPaint)
-            //Log.d("ADebugTag x", (x*224.0f).toString())
-            //Log.d("ADebugTag y", (y*224.0f).toString())
-            //TODO: add so that if there is no person in the scene dont draw the box.
-            //var tesRect = Rect(box.left*2, box.top*2, box.right*2, box.bottom*2)
-            //rectOverlay.rectBox = tesRect
-        }
-        rectOverlay.head = joints[0]
-        canvas.drawCircle(joints[0].x,joints[0].y, 5.0f, textPaint)
-        //rectOverlay.left_ankle = joints[1]
+
+        // TODO: Fix rectOverlay to be the correct size
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+
+
+        // head
+        rectOverlay.head.xValue = (joints[0].x) * width
+        rectOverlay.head.yValue = (joints[0].y) * height
+        // left ankle
+        rectOverlay.left_ankle.xValue = (joints[1].x) * width
+        rectOverlay.left_ankle.yValue = (joints[1].y) * height
+        // left_elbow
+        rectOverlay.left_elbow.xValue = (joints[2].x) * width
+        rectOverlay.left_elbow.yValue = (joints[2].y) * height
+        //left_hip
+        rectOverlay.left_hip.xValue = (joints[3].x) * width
+        rectOverlay.left_hip.yValue = (joints[3].y) * height
+        //left_knee
+        rectOverlay.left_knee.xValue = (joints[4].x) * width
+        rectOverlay.left_knee.yValue = (joints[4].y) * height
+        //left_shoulder
+        rectOverlay.left_shoulder.xValue = (joints[5].x) * width
+        rectOverlay.left_shoulder.yValue = (joints[5].y) * height
+        //left_wrist
+        rectOverlay.left_wrist.xValue = (joints[6].x) * width
+        rectOverlay.left_wrist.yValue = (joints[6].y) * height
+        //neck
+        rectOverlay.neck.xValue = (joints[7].x) * width
+        rectOverlay.neck.yValue = (joints[7].y) * height
+        //right_ankle
+        rectOverlay.right_ankle.xValue = (joints[8].x) * width
+        rectOverlay.right_ankle.yValue = (joints[8].y) * height
+        //right_elbow
+        rectOverlay.right_elbow.xValue = (joints[9].x) * width
+        rectOverlay.right_elbow.yValue = (joints[9].y) * height
+        //right_hip
+        rectOverlay.right_hip.xValue = (joints[10].x) * width
+        rectOverlay.right_hip.yValue = (joints[10].y) * height
+        //right_knee
+        rectOverlay.right_knee.xValue = (joints[11].x) * width
+        rectOverlay.right_knee.yValue = (joints[11].y) * height
+        //right_shoulder
+        rectOverlay.right_shoulder.xValue = (joints[12].x) * width
+        rectOverlay.right_shoulder.yValue = (joints[12].y) * height
+        //right_writs
+        rectOverlay.right_writs.xValue = (joints[13].x) * width
+        rectOverlay.right_writs.yValue = (joints[13].y) * height
+        //torso
+        rectOverlay.torso.xValue = (joints[14].x) * width
+        rectOverlay.torso.yValue = (joints[14].y) * height
 
         rectOverlay.draw(canvas)
-        rectOverlay.invalidate()
+
     }
 
 
@@ -147,6 +224,8 @@ class MainActivity : AppCompatActivity() {
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
+            var sendModel = getSelectedModel()
+
             // Preview
             val preview = Preview.Builder()
                 .build()
@@ -157,15 +236,18 @@ class MainActivity : AppCompatActivity() {
             imageCapture = ImageCapture.Builder()
                 .build()
 
-
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(Size(224, 224))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also { analysisUseCase: ImageAnalysis ->
-                    analysisUseCase.setAnalyzer(cameraExecutor, ImageAnalyzer(this) { items ->
+                    analysisUseCase.setAnalyzer(cameraExecutor, ImageAnalyzer(this, sendModel) { items ->
+                        runOnUiThread {
+                            var inferenceTime = items[15].x.toString()
+                            signalText.text = JamesAngles(items).getSignal()
+                            fpsCounter.text = "Inference time: ${inferenceTime} sec"
+                        }
                         debugPrint(items)
-
                     })
                 }
 
@@ -202,6 +284,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        mlExecutor.shutdown()
     }
 
     companion object {
@@ -227,39 +310,230 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     /* Custom ImageAnalyzer */
-    private class ImageAnalyzer(ctx: Context, private val listener: CoordinateListener) :
-        ImageAnalysis.Analyzer {
+    private class ImageAnalyzer(ctx: Context, private var models: String, private val listener: CoordinateListener) : ImageAnalysis.Analyzer {
+        // check what items has been selected in spinner
 
-        // Initializing the pose estimator
-        private val poseEstimator = TfliteTestMetadata.newInstance(ctx)
+        val currentModel = getModels()  // get selected model from spinner
+
+        val mobilenetS1 = McflyMobilenetArchD2s1Tunedat100.newInstance(ctx)
+        val mobilenetS2 = McflyMobilenetArchD2s2Tunedat100.newInstance(ctx)
+        val mobilenetS3 = McflyMobilenetArchD2s3Tunedat100.newInstance(ctx)
+        val mobilenetS4 = McflyMobilenetArchD2s4Tunedat100.newInstance(ctx)
+        val mobilenetS5 = McflyMobilenetArchD2s5Tunedat100.newInstance(ctx)
+        val mobilenetS6 = McflyMobilenetArchD2s6Tunedat100.newInstance(ctx)
+        val mobilenetS7 = McflyMobilenetArchD2s7Tunedat100.newInstance(ctx)
+        val mobilenetS8 = McflyMobilenetArchD2s8Tunedat100.newInstance(ctx)
+
+        val resnets1 = McflyResnetArchD2s1Tunedat100.newInstance(ctx)
+        val resnets2 = McflyResnetArchD2s2Tunedat100.newInstance(ctx)
+        val resnets3 = McflyResnetArchD2s3Tunedat100.newInstance(ctx)
+        val resnets4 = McflyResnetArchD2s4Tunedat100.newInstance(ctx)
+        val resnets5 = McflyResnetArchD2s5Tunedat100.newInstance(ctx)
+        val resnets6 = McflyResnetArchD2s6Tunedat100.newInstance(ctx)
+        val resnets7 = McflyResnetArchD2s7Tunedat100.newInstance(ctx)
+        val resnets8 = McflyResnetArchD2s8Tunedat100.newInstance(ctx)
+
+        val cnn1 = McflyCnnD2s1V2.newInstance(ctx)
+        val cnn2 = McflyCnnD2s2V2.newInstance(ctx)
+        val cnn3 = McflyCnnD2s3V2.newInstance(ctx)
+        val cnn4 = McflyCnnD2s4V2.newInstance(ctx)
+        val cnn5 = McflyCnnD2s5V2.newInstance(ctx)
+        val cnn6 = McflyCnnD2s6V2.newInstance(ctx)
+        val cnn7 = McflyCnnD2s7V2.newInstance(ctx)
+        val cnn8 = McflyCnnD2s8V2.newInstance(ctx)
+
+        fun predict(input: TensorBuffer): TensorBuffer{
+            // if models contains "mobilenet"
+            if (models.contains("mobilenet")){
+                if (models == "mobilenet_s1"){
+                    val outputs = mobilenetS1.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s2"){
+                    val outputs = mobilenetS2.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s3"){
+                    val outputs = mobilenetS3.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s4"){
+                    val outputs = mobilenetS4.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s5"){
+                    val outputs = mobilenetS5.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s6"){
+                    val outputs = mobilenetS6.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s7"){
+                    val outputs = mobilenetS7.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "mobilenet_s8"){
+                    val outputs = mobilenetS8.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+            }
+            else if (models.contains("resnet")){
+                if (models == "resnet_s1"){
+                    val outputs = resnets1.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s2"){
+                    val outputs = resnets2.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s3"){
+                    val outputs = resnets3.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s4"){
+                    val outputs = resnets4.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s5"){
+                    val outputs = resnets5.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s6"){
+                    val outputs = resnets6.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s7"){
+                    val outputs = resnets7.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "resnet_s8"){
+                    val outputs = resnets8.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+            }
+            else if (models.contains("cnn")){
+                if (models == "cnn_s1"){
+                    // use GPU if available
+                    val outputs = cnn1.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s2"){
+                    val outputs = cnn2.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s3"){
+                    val outputs = cnn3.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s4"){
+                    val outputs = cnn4.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s5"){
+                    val outputs = cnn5.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s6"){
+                    val outputs = cnn6.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s7"){
+                    val outputs = cnn7.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+                else if (models == "cnn_s8"){
+                    val outputs = cnn8.process(input)
+                    return outputs.outputFeature0AsTensorBuffer
+                }
+            }
+
+            return TensorBuffer.createFixedSize(intArrayOf(1, 1, 30), DataType.FLOAT32)
+        }
 
         override fun analyze(imageProxy: ImageProxy) {
 
+            models = getModels()
+
             val items = mutableListOf<Coordinate>()
+            // system time in seconds
+            val startTime = System.currentTimeMillis() / 1000.0
 
-            // TODO 2: Convert Image to Bitmap then to TensorImage
-            val tfImage = TensorImage.fromBitmap(toBitmap(imageProxy))
+            val bitmap = toBitmap(imageProxy)
 
-            // TODO 3: Process the image using the trained model, sort and pick out the top results
-            val outputs = poseEstimator.process(tfImage)
-            // val probability = outputs.probabilityAsTensorBuffer.floatArray  // This returns the normalized coordinates.
-            val tesProb = outputs.probabilityAsCategoryList
-            //Log.d("ADebugTag testProb", tesProb.toString())
+            val imageProcessor = ImageProcessor.Builder()
+                .add(ResizeOp(224, 224, ResizeOp.ResizeMethod.BILINEAR))
+                .build()
 
-            //val head = Coordinate(probability[0]*12, probability[1]*16)
-            //val left_ankle = Coordinate(probability[2]*224, probability[3]*224)
+            var tensorImage = TensorImage(DataType.FLOAT32)
 
-            val head = Coordinate((tesProb[0].score*224.0f)*(1080/224), (tesProb[1].score*224.0f)*(1080/224))
+            // Analysis code for every frame
+            // Preprocess the image
+            tensorImage.load(bitmap)
+            tensorImage = imageProcessor.process(tensorImage)
+
+            val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
+            inputFeature0.loadBuffer(tensorImage.buffer)
+
+            //Run the model on the image and get the output.
+            val outputFeature0 = predict(inputFeature0)
+
+            // current system time in seconds
+            val endTime = System.currentTimeMillis() / 1000.0
+            // TODO 3: Calculate the inference time
+            val inferenceTime = endTime - startTime
+
+            // TODO 4: Calculate the FPS
+            val fps = 1.0 / inferenceTime
+
+
+            val head = Coordinate(outputFeature0.floatArray[0], outputFeature0.floatArray[1])
+            val left_ankle = Coordinate(outputFeature0.floatArray[2], outputFeature0.floatArray[3])
+            val left_elbow = Coordinate(outputFeature0.floatArray[4], outputFeature0.floatArray[5])
+            val left_hip = Coordinate(outputFeature0.floatArray[6], outputFeature0.floatArray[7])
+            val left_knee = Coordinate(outputFeature0.floatArray[8], outputFeature0.floatArray[9])
+            val left_shoulder = Coordinate(outputFeature0.floatArray[10], outputFeature0.floatArray[11])
+            val left_wrist = Coordinate(outputFeature0.floatArray[12], outputFeature0.floatArray[13])
+            val neck = Coordinate(outputFeature0.floatArray[14], outputFeature0.floatArray[15])
+            val right_ankle = Coordinate(outputFeature0.floatArray[16], outputFeature0.floatArray[17])
+            val right_elbow = Coordinate(outputFeature0.floatArray[18], outputFeature0.floatArray[19])
+            val right_hip = Coordinate(outputFeature0.floatArray[20], outputFeature0.floatArray[21])
+            val right_knee = Coordinate(outputFeature0.floatArray[22], outputFeature0.floatArray[23])
+            val right_shoulder = Coordinate(outputFeature0.floatArray[24], outputFeature0.floatArray[25])
+            val right_wrist = Coordinate(outputFeature0.floatArray[26], outputFeature0.floatArray[27])
+            val torso = Coordinate(outputFeature0.floatArray[28], outputFeature0.floatArray[29])
+
             items.add(head)
-
+            items.add(left_ankle)
+            items.add(left_elbow)
+            items.add(left_hip)
+            items.add(left_knee)
+            items.add(left_shoulder)
+            items.add(left_wrist)
+            items.add(neck)
+            items.add(right_ankle)
+            items.add(right_elbow)
+            items.add(right_hip)
+            items.add(right_knee)
+            items.add(right_shoulder)
+            items.add(right_wrist)
+            items.add(torso)
+            items.add(Coordinate(inferenceTime.toFloat(), inferenceTime.toFloat()))
 
             listener(items.toList())
+            // fpsCounter(inferenceTime)
 
             // Close the image,this tells CameraX to feed the next image to the analyzer
             imageProxy.close()
         }
+
+        fun getModels(): String {
+            return models
+        }
+//        fun setModels(models: String) {
+//            this.models = models
+//        }
 
         /**
          * Convert Image Proxy to Bitmap

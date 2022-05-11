@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">Luke</string>
+
+    <string name="selected_item">Selected model:</string>
+    <string name="textview">TextView</string>
+
+    <string-array name="model_array">
+        <item>mobilenet_s1</item>
+        <item>mobilenet_s2</item>
+        <item>mobilenet_s3</item>
+        <item>mobilenet_s4</item>
+        <item>mobilenet_s5</item>
+        <item>mobilenet_s6</item>
+        <item>mobilenet_s7</item>
+        <item>mobilenet_s8</item>
+        <item>resnet_s1</item>
+        <item>resnet_s2</item>
+        <item>resnet_s3</item>
+        <item>resnet_s4</item>
+        <item>resnet_s5</item>
+        <item>resnet_s6</item>
+        <item>resnet_s7</item>
+        <item>resnet_s8</item>
+        <item>cnn_s1</item>
+        <item>cnn_s2</item>
+        <item>cnn_s3</item>
+        <item>cnn_s4</item>
+        <item>cnn_s5</item>
+        <item>cnn_s6</item>
+        <item>cnn_s7</item>
+        <item>cnn_s8</item>
+    </string-array>
+
+
 </resources>

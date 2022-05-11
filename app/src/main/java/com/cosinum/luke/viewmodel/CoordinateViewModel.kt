@@ -22,12 +22,12 @@ class CoordinateViewModel : ViewModel() {
 /**
  * Simple Data object with two fields for the label and probability
  */
-data class Coordinate(val x:Float, val y:Float) {
+data class Coordinate(var x:Float, var y:Float) {
 
     // For easy logging
     override fun toString():String{
-        return "$x_value / $y_value"
+        return "$xValue / $yValue"
     }
-    val x_value = x*224
-    val y_value = y*224
+    var xValue = x
+    var yValue = y
 }
