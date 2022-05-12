@@ -21,6 +21,7 @@ class RectOverlay(context: Context?, @Nullable attrs: AttributeSet?) : View(cont
     var tPaint: Paint = Paint()
     var lPaint: Paint = Paint()
     var nPaint: Paint = Paint()
+    var textPaint: Paint = Paint()
 
     var head: Coordinate = Coordinate(0.0f, 0.0f)
         set(value) {
@@ -104,34 +105,106 @@ class RectOverlay(context: Context?, @Nullable attrs: AttributeSet?) : View(cont
         nPaint.color = Color.MAGENTA
         nPaint.strokeWidth = 10.0f
         nPaint.style = Paint.Style.STROKE
+
+        textPaint.color = Color.WHITE
+        textPaint.textSize = 30.0f
+        textPaint.style = Paint.Style.FILL
+        textPaint.strokeWidth = 10.0f
+
     }
+
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         // DRAW STUFF HERE
 
-        head?.let {
-            canvas?.drawCircle(head.xValue,head.yValue, 10.0f, paint)
-            canvas?.drawCircle(left_ankle.xValue,left_ankle.yValue, 10.0f, lPaint)
-            canvas?.drawCircle(left_elbow.xValue,left_elbow.yValue, 10.0f, lPaint)
-            canvas?.drawCircle(left_hip.xValue,left_hip.yValue, 10.0f, lPaint)
-            canvas?.drawCircle(left_knee.xValue,left_knee.yValue, 10.0f, lPaint)
-            canvas?.drawCircle(left_shoulder.xValue,left_shoulder.yValue, 10.0f, lPaint)
-            canvas?.drawCircle(left_wrist.xValue,left_wrist.yValue, 10.0f, lPaint)
-            canvas?.drawCircle(neck.xValue,neck.yValue, 10.0f, nPaint)
-            canvas?.drawCircle(right_ankle.xValue,right_ankle.yValue, 10.0f, rPaint)
-            canvas?.drawCircle(right_elbow.xValue,right_elbow.yValue, 10.0f, rPaint)
-            canvas?.drawCircle(right_hip.xValue,right_hip.yValue, 10.0f, rPaint)
-            canvas?.drawCircle(right_knee.xValue,right_knee.yValue, 10.0f, rPaint)
-            canvas?.drawCircle(right_shoulder.xValue,right_shoulder.yValue, 10.0f, rPaint)
-            canvas?.drawCircle(right_writs.xValue,right_writs.yValue, 10.0f, rPaint)
-            canvas?.drawCircle(torso.xValue,torso.yValue, 10.0f, tPaint)
-            // canvas?.drawCircle(1080.0f/2, 2097.0f/2, 5.0f, paint)
-            invalidate()
+        //draw text at the top of the screen
+
+        if (head.xValue > 1.0f && head.yValue-140 > 1.0f) {
+            canvas?.drawCircle(head.xValue,head.yValue, 10.0f, nPaint)
         }
-        //invalidate()
+        if (neck.xValue > 1.0f && neck.yValue-120 > 1.0f) {
+            canvas?.drawCircle(neck.xValue,neck.yValue, 10.0f, paint)
+        }
+        if (left_ankle.xValue > 1.0f && left_ankle.yValue-110 > 1.0f) {
+            canvas?.drawCircle(left_ankle.xValue,left_ankle.yValue, 10.0f, lPaint)
+        }
+        if (right_ankle.xValue > 1.0f && right_ankle.yValue-110 > 1.0f) {
+            canvas?.drawCircle(right_ankle.xValue,right_ankle.yValue, 10.0f, rPaint)
+        }
+        if (left_elbow.xValue > 1.0f && left_elbow.yValue > 1.0f) {
+            canvas?.drawCircle(left_elbow.xValue,left_elbow.yValue, 10.0f, lPaint)
+        }
+        if (right_elbow.xValue > 1.0f && right_elbow.yValue > 1.0f) {
+            canvas?.drawCircle(right_elbow.xValue,right_elbow.yValue, 10.0f, rPaint)
+        }
+        if (left_hip.xValue > 1.0f && left_hip.yValue > 1.0f) {
+            canvas?.drawCircle(left_hip.xValue,left_hip.yValue, 10.0f, lPaint)
+        }
+        if (right_hip.xValue > 1.0f && right_hip.yValue > 1.0f) {
+            canvas?.drawCircle(right_hip.xValue,right_hip.yValue, 10.0f, rPaint)
+        }
+        if (left_knee.xValue > 1.0f && left_knee.yValue+60 > 1.0f) {
+            canvas?.drawCircle(left_knee.xValue,left_knee.yValue, 10.0f, lPaint)
+        }
+        if (right_knee.xValue > 1.0f && right_knee.yValue+60 > 1.0f) {
+            canvas?.drawCircle(right_knee.xValue,right_knee.yValue, 10.0f, rPaint)
+        }
+        if (left_shoulder.xValue > 1.0f && left_shoulder.yValue-100 > 1.0f) {
+            canvas?.drawCircle(left_shoulder.xValue,left_shoulder.yValue, 10.0f, lPaint)
+        }
+        if (right_shoulder.xValue > 1.0f && right_shoulder.yValue-100 > 1.0f) {
+            canvas?.drawCircle(right_shoulder.xValue,right_shoulder.yValue, 10.0f, rPaint)
+        }
+        if (left_wrist.xValue > 1.0f && left_wrist.yValue > 1.0f) {
+            canvas?.drawCircle(left_wrist.xValue,left_wrist.yValue, 10.0f, lPaint)
+        }
+        if (right_writs.xValue > 1.0f && right_writs.yValue > 1.0f) {
+            canvas?.drawCircle(right_writs.xValue,right_writs.yValue, 10.0f, rPaint)
+        }
+        if (torso.xValue > 1.0f && torso.yValue > 1.0f) {
+            canvas?.drawCircle(torso.xValue,torso.yValue, 10.0f, tPaint)
+        }
 
+/*
+     //canvas?.drawCircle(neck.xValue, neck.yValue, 10.0f, paint)
+     canvas?.drawCircle(left_ankle.xValue,left_ankle.yValue, 10.0f, lPaint)
+     canvas?.drawCircle(left_elbow.xValue,left_elbow.yValue, 10.0f, lPaint)
+     canvas?.drawCircle(left_hip.xValue,left_hip.yValue, 10.0f, lPaint)
+     canvas?.drawCircle(left_knee.xValue,left_knee.yValue, 10.0f, lPaint)
+     canvas?.drawCircle(left_shoulder.xValue,left_shoulder.yValue, 10.0f, lPaint)
+     canvas?.drawCircle(left_wrist.xValue,left_wrist.yValue, 10.0f, lPaint)
+     canvas?.drawCircle(right_ankle.xValue,right_ankle.yValue, 10.0f, rPaint)
+     canvas?.drawCircle(right_elbow.xValue,right_elbow.yValue, 10.0f, rPaint)
+     canvas?.drawCircle(right_hip.xValue,right_hip.yValue, 10.0f, rPaint)
+     canvas?.drawCircle(right_knee.xValue,right_knee.yValue, 10.0f, rPaint)
+     canvas?.drawCircle(right_shoulder.xValue,right_shoulder.yValue, 10.0f, rPaint)
+     canvas?.drawCircle(right_writs.xValue,right_writs.yValue, 10.0f, rPaint)
+     canvas?.drawCircle(torso.xValue,torso.yValue, 10.0f, tPaint)*/
+     invalidate()
+ /*
+     head?.let {
+         canvas?.drawCircck.xValue, neck.yValue, 10.0f, paint)
+         canvas?.drawCircle(left_ankle.xValue,left_ankle.yValue, 10.0f, lPaint)
+         canvas?.drawCircle(left_elbow.xValue,left_elbow.yValue, 10.0f, lPaint)
+         canvas?.drawCircle(left_hip.xValue,left_hip.yValue, 10.0f, lPaint)
+         canvas?.drawCircle(left_knee.xValue,left_knee.yValue, 10.0f, lPaint)
+         canvas?.drawCircle(left_shoulder.xValue,left_shoulder.yValue, 10.0f, lPaint)
+         canvas?.drawCircle(left_wrist.xValue,left_wrist.yValue, 10.0f, lPaint)
+         canvas?.drawCircle(neck.xValue,neck.yValue, 10.0f, nPaint)
+         canvas?.drawCircle(right_ankle.xValue,right_ankle.yValue, 10.0f, rPaint)
+         canvas?.drawCircle(right_elbow.xValue,right_elbow.yValue, 10.0f, rPaint)
+         canvas?.drawCircle(right_hip.xValue,right_hip.yValue, 10.0f, rPaint)
+         canvas?.drawCircle(right_knee.xValue,right_knee.yValue, 10.0f, rPaint)
+         canvas?.drawCircle(right_shoulder.xValue,right_shoulder.yValue, 10.0f, rPaint)
+         canvas?.drawCircle(right_writs.xValue,right_writs.yValue, 10.0f, rPaint)
+         canvas?.drawCircle(torso.xValue,torso.yValue, 10.0f, tPaint)
+         // canvas?.drawCircle(1080.0f/2, 2097.0f/2, 5.0f, paint)
+         invalidate()
+     }
+     //invalidate()
+*/
 
-    }
+ }
 }

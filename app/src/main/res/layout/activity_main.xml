@@ -21,6 +21,16 @@
         android:minHeight="32dp"
         tools:ignore="MissingConstraints" />
 
+    <Button
+        android:id="@+id/draw_button"
+        android:layout_width="172dp"
+        android:layout_height="36dp"
+        android:text="keypoints off"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/fpsCounter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <TextView
         android:id="@+id/fpsCounter"
         android:layout_width="wrap_content"

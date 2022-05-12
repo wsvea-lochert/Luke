@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var mlExecutor: ExecutorService
     private var selectedModel: String = ""
+    var drawing = true
+
 
 
     private fun getSelectedModel(): String {
@@ -78,6 +80,17 @@ class MainActivity : AppCompatActivity() {
 
         // Set up the listener for take photo button
         //camera_capture_button.setOnClickListener { takePhoto() }
+        draw_button.setOnClickListener {
+            if (drawing) {
+                drawing = false
+                draw_button.text = "Keypoints on"
+                zeroKeypoints()
+            } else {
+                drawing = true
+                draw_button.text = "Keypoints off"
+            }
+        }
+
 
         outputDirectory = getOutputDirectory()
 
@@ -114,6 +127,56 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun zeroKeypoints(){
+        var canvas = Canvas(Bitmap.createBitmap(rectOverlay.width, rectOverlay.height, Bitmap.Config.ARGB_8888))
+        rectOverlay.head.xValue = 0.0f
+        rectOverlay.head.yValue = 0.0f
+        // left ankle
+        rectOverlay.left_ankle.xValue = 0.0f
+        rectOverlay.left_ankle.yValue = 0.0f
+        // left_elbow
+        rectOverlay.left_elbow.xValue = 0.0f
+        rectOverlay.left_elbow.yValue = 0.0f
+        //left_hip
+        rectOverlay.left_hip.xValue = 0.0f
+        rectOverlay.left_hip.yValue = 0.0f
+        //left_knee
+        rectOverlay.left_knee.xValue = 0.0f
+        rectOverlay.left_knee.yValue = 0.0f
+        //left_shoulder
+        rectOverlay.left_shoulder.xValue = 0.0f
+        rectOverlay.left_shoulder.yValue = 0.0f
+        //left_wrist
+        rectOverlay.left_wrist.xValue = 0.0f
+        rectOverlay.left_wrist.yValue = 0.0f
+        //neck
+        rectOverlay.neck.xValue = 0.0f
+        rectOverlay.neck.yValue = 0.0f
+        //right_ankle
+        rectOverlay.right_ankle.xValue = 0.0f
+        rectOverlay.right_ankle.yValue = 0.0f
+        //right_elbow
+        rectOverlay.right_elbow.xValue = 0.0f
+        rectOverlay.right_elbow.yValue = 0.0f
+        //right_hip
+        rectOverlay.right_hip.xValue = 0.0f
+        rectOverlay.right_hip.yValue = 0.0f
+        //right_knee
+        rectOverlay.right_knee.xValue = 0.0f
+        rectOverlay.right_knee.yValue = 0.0f
+        //right_shoulder
+        rectOverlay.right_shoulder.xValue = 0.0f
+        rectOverlay.right_shoulder.yValue = 0.0f
+        //right_writs
+        rectOverlay.right_writs.xValue = 0.0f
+        rectOverlay.right_writs.yValue = 0.0f
+        //torso
+        rectOverlay.torso.xValue = 0.0f
+        rectOverlay.torso.yValue = 0.0f
+
+        rectOverlay.draw(canvas)
+    }
+
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
@@ -145,73 +208,80 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
     // Log the prediction results so they are readable input
     private fun debugPrint(joints: List<Coordinate>) {
 
         var canvas = Canvas(Bitmap.createBitmap(rectOverlay.width, rectOverlay.height, Bitmap.Config.ARGB_8888))
-        val textPaint =
+        /*val textPaint =
             Paint().apply {
                 isAntiAlias = true
                 color = Color.RED
                 style = Paint.Style.STROKE
-            }
+            }*/
 
 
 
         // TODO: Fix rectOverlay to be the correct size
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
+        //val displayMetrics = DisplayMetrics()
+        //windowManager.defaultDisplay.getMetrics(displayMetrics)
+        //val height = displayMetrics.heightPixels
+        //val width = displayMetrics.widthPixels
+
+        // get the hegiht of rectOverlay
+        if (drawing) {
+            val height = rectOverlay.height
+            val width = rectOverlay.width
 
 
-        // head
-        rectOverlay.head.xValue = (joints[0].x) * width
-        rectOverlay.head.yValue = (joints[0].y) * height
-        // left ankle
-        rectOverlay.left_ankle.xValue = (joints[1].x) * width
-        rectOverlay.left_ankle.yValue = (joints[1].y) * height
-        // left_elbow
-        rectOverlay.left_elbow.xValue = (joints[2].x) * width
-        rectOverlay.left_elbow.yValue = (joints[2].y) * height
-        //left_hip
-        rectOverlay.left_hip.xValue = (joints[3].x) * width
-        rectOverlay.left_hip.yValue = (joints[3].y) * height
-        //left_knee
-        rectOverlay.left_knee.xValue = (joints[4].x) * width
-        rectOverlay.left_knee.yValue = (joints[4].y) * height
-        //left_shoulder
-        rectOverlay.left_shoulder.xValue = (joints[5].x) * width
-        rectOverlay.left_shoulder.yValue = (joints[5].y) * height
-        //left_wrist
-        rectOverlay.left_wrist.xValue = (joints[6].x) * width
-        rectOverlay.left_wrist.yValue = (joints[6].y) * height
-        //neck
-        rectOverlay.neck.xValue = (joints[7].x) * width
-        rectOverlay.neck.yValue = (joints[7].y) * height
-        //right_ankle
-        rectOverlay.right_ankle.xValue = (joints[8].x) * width
-        rectOverlay.right_ankle.yValue = (joints[8].y) * height
-        //right_elbow
-        rectOverlay.right_elbow.xValue = (joints[9].x) * width
-        rectOverlay.right_elbow.yValue = (joints[9].y) * height
-        //right_hip
-        rectOverlay.right_hip.xValue = (joints[10].x) * width
-        rectOverlay.right_hip.yValue = (joints[10].y) * height
-        //right_knee
-        rectOverlay.right_knee.xValue = (joints[11].x) * width
-        rectOverlay.right_knee.yValue = (joints[11].y) * height
-        //right_shoulder
-        rectOverlay.right_shoulder.xValue = (joints[12].x) * width
-        rectOverlay.right_shoulder.yValue = (joints[12].y) * height
-        //right_writs
-        rectOverlay.right_writs.xValue = (joints[13].x) * width
-        rectOverlay.right_writs.yValue = (joints[13].y) * height
-        //torso
-        rectOverlay.torso.xValue = (joints[14].x) * width
-        rectOverlay.torso.yValue = (joints[14].y) * height
+            // head
+            rectOverlay.head.xValue = (joints[0].x) * width
+            rectOverlay.head.yValue = (joints[0].y) * height + 140
+            // left ankle
+            rectOverlay.left_ankle.xValue = (joints[1].x) * width
+            rectOverlay.left_ankle.yValue = (joints[1].y) * height - 110
+            // left_elbow
+            rectOverlay.left_elbow.xValue = (joints[2].x) * width
+            rectOverlay.left_elbow.yValue = (joints[2].y) * height
+            //left_hip
+            rectOverlay.left_hip.xValue = (joints[3].x) * width
+            rectOverlay.left_hip.yValue = (joints[3].y) * height
+            //left_knee
+            rectOverlay.left_knee.xValue = (joints[4].x) * width
+            rectOverlay.left_knee.yValue = (joints[4].y) * height - 60
+            //left_shoulder
+            rectOverlay.left_shoulder.xValue = (joints[5].x) * width
+            rectOverlay.left_shoulder.yValue = (joints[5].y) * height + 100
+            //left_wrist
+            rectOverlay.left_wrist.xValue = (joints[6].x) * width
+            rectOverlay.left_wrist.yValue = (joints[6].y) * height
+            //neck
+            rectOverlay.neck.xValue = (joints[7].x) * width
+            rectOverlay.neck.yValue = (joints[7].y) * height + 120
+            //right_ankle
+            rectOverlay.right_ankle.xValue = (joints[8].x) * width
+            rectOverlay.right_ankle.yValue = (joints[8].y) * height - 110
+            //right_elbow
+            rectOverlay.right_elbow.xValue = (joints[9].x) * width
+            rectOverlay.right_elbow.yValue = (joints[9].y) * height
+            //right_hip
+            rectOverlay.right_hip.xValue = (joints[10].x) * width
+            rectOverlay.right_hip.yValue = (joints[10].y) * height
+            //right_knee
+            rectOverlay.right_knee.xValue = (joints[11].x) * width
+            rectOverlay.right_knee.yValue = (joints[11].y) * height - 60
+            //right_shoulder
+            rectOverlay.right_shoulder.xValue = (joints[12].x) * width
+            rectOverlay.right_shoulder.yValue = (joints[12].y) * height + 100
+            //right_writs
+            rectOverlay.right_writs.xValue = (joints[13].x) * width
+            rectOverlay.right_writs.yValue = (joints[13].y) * height
+            //torso
+            rectOverlay.torso.xValue = (joints[14].x) * width
+            rectOverlay.torso.yValue = (joints[14].y) * height
 
-        rectOverlay.draw(canvas)
+            rectOverlay.draw(canvas)
+        }
 
     }
 
