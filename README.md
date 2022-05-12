@@ -1,7 +1,5 @@
 # Luke
 ![](/banner.png)
-Luke is a Android app made to run human pose estimation models. This project is created as a part of my master project at 
-Høgskolen i Østfold. 
 
 ## What is Luke?
 Luke is a Android app made to run human pose estimation models. The app generates steering signals for manoeuvring autonomous vehicles based on predictions from a HPE model. 
