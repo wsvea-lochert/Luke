@@ -1,10 +1,23 @@
 # Luke
+![](/banner.png)
 Luke is a Android app made to run human pose estimation models. This project is created as a part of my master project at 
-Østfold University College with Forsvarets forskningsinstitutt. 
+Høgskolen i Østfold. 
 
-The goal of the project is to create a human pose estimation (HPE) model to steer a autonomous vehicle
-via a smartphone. The model is trained on a dataset of human poses containing 15 keypoints per image. 
-To label the dataset I have made a custom web based labeling tool [C3P0](https://github.com/Cosinium/c3po/ "C3p0") utilizing React and Firebase.
+## What is Luke?
+Luke is a Android app made to run human pose estimation models. The app generates steering signals for manoeuvring autonomous vehicles based on predictions from a HPE model. 
+
+## prerequisites
+* Android Studio
+* Android phone running Android 10 or higher
+
+## Installation
+To close the run the following command:
+
+`git clone https://github.com/wsvea-lochert/Luke.git`
+
+- NOTE: This app will not run on an emulator as it requires camera hardware from a phone. 
+
+Next open the project folder in Android Studio and build the project. When the project is done building plug your phone into your computer and run the project.
 
 More documentation is comming soon.
 ## Author
