@@ -315,6 +315,21 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             var inferenceTime = items[15].x.toString()
                             signalText.text = JamesAngles(items).getSignal()
+                            if (signalText.text.toString() == "stop"){
+                                signalText.setTextColor(Color.RED)
+                            }
+                            else if (signalText.text.toString() == "left"){
+                                signalText.setTextColor(Color.GREEN)
+                            }
+                            else if (signalText.text.toString() == "right"){
+                                signalText.setTextColor(Color.BLUE)
+                            }
+                            else if (signalText.text.toString() == "forward"){
+                                signalText.setTextColor(Color.YELLOW)
+                            }
+                            else if (signalText.text.toString() == "backward"){
+                                signalText.setTextColor(Color.MAGENTA)
+                            }
                             fpsCounter.text = "Inference time: ${inferenceTime} sec"
                         }
                         debugPrint(items)
