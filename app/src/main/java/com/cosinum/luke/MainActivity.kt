@@ -327,7 +327,7 @@ class MainActivity : AppCompatActivity() {
                             else if (signalText.text.toString() == "forward"){
                                 signalText.setTextColor(Color.YELLOW)
                             }
-                            else if (signalText.text.toString() == "backward"){
+                            else if (signalText.text.toString() == "reverse"){
                                 signalText.setTextColor(Color.MAGENTA)
                             }
                             fpsCounter.text = "Inference time: ${inferenceTime} sec"
