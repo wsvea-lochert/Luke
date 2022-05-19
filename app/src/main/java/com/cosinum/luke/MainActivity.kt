@@ -314,21 +314,25 @@ class MainActivity : AppCompatActivity() {
                     analysisUseCase.setAnalyzer(cameraExecutor, ImageAnalyzer(this, sendModel) { items ->
                         runOnUiThread {
                             var inferenceTime = items[15].x.toString()
-                            signalText.text = JamesAngles(items).getSignal()
-                            if (signalText.text.toString() == "stop"){
-                                signalText.setTextColor(Color.RED)
-                            }
-                            else if (signalText.text.toString() == "left"){
-                                signalText.setTextColor(Color.GREEN)
-                            }
-                            else if (signalText.text.toString() == "right"){
-                                signalText.setTextColor(Color.BLUE)
-                            }
-                            else if (signalText.text.toString() == "forward"){
-                                signalText.setTextColor(Color.YELLOW)
-                            }
-                            else if (signalText.text.toString() == "reverse"){
-                                signalText.setTextColor(Color.MAGENTA)
+                            var signals = JamesAngles(items)
+                            signalText.text = signals.getSignal()
+                            //throttleText.text = signals.thro
+                            when {
+                                signalText.text.toString().contains("stop") -> {
+                                    signalText.setTextColor(Color.RED)
+                                }
+                                signalText.text.toString().contains("left") -> {
+                                    signalText.setTextColor(Color.GREEN)
+                                }
+                                signalText.text.toString().contains("right") -> {
+                                    signalText.setTextColor(Color.BLUE)
+                                }
+                                signalText.text.toString().contains("forward") -> {
+                                    signalText.setTextColor(Color.YELLOW)
+                                }
+                                signalText.text.toString().contains("reverse") -> {
+                                    signalText.setTextColor(Color.MAGENTA)
+                                }
                             }
                             fpsCounter.text = "Inference time: ${inferenceTime} sec"
                         }

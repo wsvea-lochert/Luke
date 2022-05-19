@@ -42,16 +42,16 @@ class JamesAngles(private val joints: List<Coordinate>) {
                         return "stop"
                     }
                     else if (leftAngle in 50.0..110.0 && rightAngle !in 50.0..110.0) {
-                        return "right"
+                        return "right, throttle:${throttleInput(angleCalc(leftShoulder, leftElbow, leftWrist))}"
                     }
                     else if (leftAngle !in 50.0..110.0 && rightAngle in 50.0..110.0) {
-                        return "left"
+                        return "left, throttle:${throttleInput(angleCalc(rightShoulder, rightElbow, rightWrist))}"
                     }
                     else if (leftAngle in 115.0..180.0 && rightAngle in 115.0..180.0) {
-                        return "reverse"
+                        return "reverse, throttle: 10%"
                     }
                     else if (leftAngle < 30 || rightAngle < 30) {
-                        return "forward"
+                        return "forward, throttle: 10%"
                     }
 //                    else if (leftAngle in 115.0..180.0 && rightAngle in 115.0..180.0) {
 //                        return "reverse"
@@ -68,16 +68,16 @@ class JamesAngles(private val joints: List<Coordinate>) {
                         return "stop"
                     }
                     else if (leftAngle in 50.0..110.0 && rightAngle !in 50.0..110.0) {
-                        return "left"
+                        return "left, throttle:${throttleInput(angleCalc(leftShoulder, leftElbow, leftWrist))}"
                     }
                     else if (leftAngle !in 50.0..110.0 && rightAngle in 50.0..110.0) {
-                        return "right"
+                        return "right, throttle:${throttleInput(angleCalc(rightShoulder, rightElbow, rightWrist))}"
                     }
                     else if (leftAngle in 115.0..180.0 && rightAngle in 115.0..180.0) {
-                        return "reverse"
+                        return "reverse, throttle: 10%"
                     }
                     else if (leftAngle in 115.0..180.0 || rightAngle in 115.0..180.0) {
-                        return "forward"
+                        return "forward, throttle: 10%"
                     }
                     else {
                         return "stop"
@@ -90,6 +90,23 @@ class JamesAngles(private val joints: List<Coordinate>) {
 
     private fun isFacing(): Boolean {
         return leftShoulder.x > rightShoulder.x
+    }
+
+    private fun throttleInput(angle: Double): String{
+        return when (angle) {
+            in 140.0..180.0 -> {
+                "10%"
+            }
+            in 135.0..100.0 -> {
+                "25%"
+            }
+            in 90.0..40.0 -> {
+                "50%"
+            }
+            else -> {
+                "10%"
+            }
+        }
     }
 
     private fun angleCalc(a: Coordinate, b: Coordinate, c: Coordinate): Double{
