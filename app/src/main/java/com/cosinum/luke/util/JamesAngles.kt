@@ -24,13 +24,13 @@ class JamesAngles(private val joints: List<Coordinate>) {
 
     fun getSignal(): String {
         if (person) {
-            if ((leftHip.x * 224 < 5 && leftHip.y * 224 < 5) || (rightHip.x * 224 < 5 && rightHip.y * 224 < 5)) {
+            if ((leftHip.x * 224 < 10 && leftHip.y * 224 < 15) || (rightHip.x * 224 < 15 && rightHip.y * 224 < 15)) {
                 return "stop"
             }
-            else if ((leftElbow.x * 224 < 5 && leftElbow.y * 224 < 5) || (rightElbow.x * 224 < 5 && rightElbow.y * 224 < 5)) {
+            else if ((leftElbow.x * 224 < 10 && leftElbow.y * 224 < 15) || (rightElbow.x * 224 < 15 && rightElbow.y * 224 < 15)) {
                 return "stop"
             }
-            else if ((leftWrist.x * 224 < 5 && leftWrist.y * 224 < 5) || (rightWrist.x * 224 < 5 && rightWrist.y * 224 < 5)) {
+            else if ((leftWrist.x * 224 < 10 && leftWrist.y * 224 < 15) || (rightWrist.x * 224 < 15 && rightWrist.y * 224 < 15)) {
                 return "stop"
             }
             else{
@@ -50,7 +50,7 @@ class JamesAngles(private val joints: List<Coordinate>) {
                     else if (leftAngle in 115.0..180.0 && rightAngle in 115.0..180.0) {
                         return "reverse, throttle: 10%"
                     }
-                    else if (leftAngle < 30 || rightAngle < 30) {
+                    else if (leftAngle in 115.0..180.0 || rightAngle in 115.0..180.0) {
                         return "forward, throttle: 10%"
                     }
 //                    else if (leftAngle in 115.0..180.0 && rightAngle in 115.0..180.0) {
