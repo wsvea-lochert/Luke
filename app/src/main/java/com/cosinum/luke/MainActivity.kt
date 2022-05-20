@@ -432,109 +432,163 @@ class MainActivity : AppCompatActivity() {
         val cnn7 = McflyCnnD2s7V2.newInstance(ctx)
         val cnn8 = McflyCnnD2s8V2.newInstance(ctx)
 
+        val residual1 = ResidualTrainSplit1.newInstance(ctx)
+        val residual2 = ResidualTrainSplit2.newInstance(ctx)
+        val residual3 = ResidualTrainSplit3.newInstance(ctx)
+        val residual4 = ResidualTrainSplit4.newInstance(ctx)
+        val residual5 = ResidualTrainSplit5.newInstance(ctx)
+        val residual6 = ResidualTrainSplit6.newInstance(ctx)
+        val residual7 = ResidualTrainSplit7.newInstance(ctx)
+        val residual8 = ResidualTrainSplit8.newInstance(ctx)
+
         fun predict(input: TensorBuffer): TensorBuffer{
             // if models contains "mobilenet"
-            if (models.contains("mobilenet")){
-                if (models == "mobilenet_s1"){
-                    val outputs = mobilenetS1.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
+            when {
+                models.contains("mobilenet") -> {
+                    when (models) {
+                        "mobilenet_s1" -> {
+                            val outputs = mobilenetS1.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s2" -> {
+                            val outputs = mobilenetS2.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s3" -> {
+                            val outputs = mobilenetS3.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s4" -> {
+                            val outputs = mobilenetS4.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s5" -> {
+                            val outputs = mobilenetS5.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s6" -> {
+                            val outputs = mobilenetS6.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s7" -> {
+                            val outputs = mobilenetS7.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "mobilenet_s8" -> {
+                            val outputs = mobilenetS8.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                    }
                 }
-                else if (models == "mobilenet_s2"){
-                    val outputs = mobilenetS2.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
+                models.contains("resnet") -> {
+                    when (models) {
+                        "resnet_s1" -> {
+                            val outputs = resnets1.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s2" -> {
+                            val outputs = resnets2.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s3" -> {
+                            val outputs = resnets3.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s4" -> {
+                            val outputs = resnets4.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s5" -> {
+                            val outputs = resnets5.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s6" -> {
+                            val outputs = resnets6.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s7" -> {
+                            val outputs = resnets7.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "resnet_s8" -> {
+                            val outputs = resnets8.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                    }
                 }
-                else if (models == "mobilenet_s3"){
-                    val outputs = mobilenetS3.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
+                models.contains("cnn") -> {
+                    when (models) {
+                        "cnn_s1" -> {
+                            // use GPU if available
+                            val outputs = cnn1.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s2" -> {
+                            val outputs = cnn2.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s3" -> {
+                            val outputs = cnn3.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s4" -> {
+                            val outputs = cnn4.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s5" -> {
+                            val outputs = cnn5.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s6" -> {
+                            val outputs = cnn6.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s7" -> {
+                            val outputs = cnn7.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "cnn_s8" -> {
+                            val outputs = cnn8.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                    }
                 }
-                else if (models == "mobilenet_s4"){
-                    val outputs = mobilenetS4.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "mobilenet_s5"){
-                    val outputs = mobilenetS5.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "mobilenet_s6"){
-                    val outputs = mobilenetS6.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "mobilenet_s7"){
-                    val outputs = mobilenetS7.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "mobilenet_s8"){
-                    val outputs = mobilenetS8.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-            }
-            else if (models.contains("resnet")){
-                if (models == "resnet_s1"){
-                    val outputs = resnets1.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s2"){
-                    val outputs = resnets2.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s3"){
-                    val outputs = resnets3.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s4"){
-                    val outputs = resnets4.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s5"){
-                    val outputs = resnets5.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s6"){
-                    val outputs = resnets6.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s7"){
-                    val outputs = resnets7.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "resnet_s8"){
-                    val outputs = resnets8.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-            }
-            else if (models.contains("cnn")){
-                if (models == "cnn_s1"){
-                    // use GPU if available
-                    val outputs = cnn1.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s2"){
-                    val outputs = cnn2.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s3"){
-                    val outputs = cnn3.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s4"){
-                    val outputs = cnn4.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s5"){
-                    val outputs = cnn5.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s6"){
-                    val outputs = cnn6.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s7"){
-                    val outputs = cnn7.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
-                }
-                else if (models == "cnn_s8"){
-                    val outputs = cnn8.process(input)
-                    return outputs.outputFeature0AsTensorBuffer
+                models.contains("residual") -> {
+                    when (models) {
+                        "residual_s1" -> {
+                            // use GPU if available
+                            val outputs = residual1.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s2" -> {
+                            val outputs = residual2.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s3" -> {
+                            val outputs = residual3.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s4" -> {
+                            val outputs = residual4.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s5" -> {
+                            val outputs = residual5.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s6" -> {
+                            val outputs = residual6.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s7" -> {
+                            val outputs = residual7.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                        "residual_s8" -> {
+                            val outputs = residual8.process(input)
+                            return outputs.outputFeature0AsTensorBuffer
+                        }
+                    }
                 }
             }
 

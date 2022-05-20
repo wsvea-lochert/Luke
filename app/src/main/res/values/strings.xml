@@ -29,6 +29,14 @@
         <item>cnn_s6</item>
         <item>cnn_s7</item>
         <item>cnn_s8</item>
+        <item>residual_s1</item>
+        <item>residual_s2</item>
+        <item>residual_s3</item>
+        <item>residual_s4</item>
+        <item>residual_s5</item>
+        <item>residual_s6</item>
+        <item>residual_s7</item>
+        <item>residual_s8</item>
     </string-array>
 
 
